@@ -1,6 +1,59 @@
-getgenv().Toggle = true
+game.StarterGui:SetCore("SendNotification", {
+    Title = "M.T.C ESP Loaded",
+    Text = "WARNING: Feature in development!\nBugs and issues present.",
+    Button1 = "OK",
+})
 
-local DB = false
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib("M.T.C ESP", "DarkTheme")
+
+local PlayerTab = Window:NewTab("Player ESP")
+local VehicleTab = Window:NewTab("Vehicle ESP")
+
+local PlayerSection = PlayerTab:NewSection("Player Settings")
+local VehicleSection = VehicleTab:NewSection("Vehicle Settings")
+
+getgenv().PlayerESP = false
+getgenv().VehicleESP = false
+getgenv().PlayerTransparency = 0.5
+getgenv().VehicleTransparency = 0.5
+
+PlayerSection:NewToggle("Enable Player ESP", "Toggle player ESP", function(state)
+    getgenv().PlayerESP = state
+    if not state then
+        for i,v in pairs(game:GetService("Players"):GetChildren()) do
+            if v.Character and v.Character:FindFirstChild("PlayerInfo") then
+                v.Character.PlayerInfo:Destroy()
+            end
+        end
+    end
+end)
+
+PlayerSection:NewSlider("Player Transparency", "Adjust player ESP transparency", 100, 50, function(s)
+    getgenv().PlayerTransparency = s / 100
+end)
+
+VehicleSection:NewToggle("Enable Vehicle ESP", "Toggle vehicle ESP", function(state)
+    getgenv().VehicleESP = state
+    if not state then
+        local spawnedVehicles = workspace:FindFirstChild("SpawnedVehicles")
+        if spawnedVehicles then
+            for _, vehicle in pairs(spawnedVehicles:GetChildren()) do
+                if vehicle:FindFirstChild("VehicleInfo") then
+                    vehicle.VehicleInfo:Destroy()
+                end
+                if vehicle:FindFirstChild("VehicleHighlight") then
+                    vehicle.VehicleHighlight:Destroy()
+                end
+            end
+        end
+    end
+end)
+
+VehicleSection:NewSlider("Vehicle Transparency", "Adjust vehicle ESP transparency", 100, 50, function(s)
+    getgenv().VehicleTransparency = s / 100
+end)
+
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
@@ -11,82 +64,95 @@ local function getVehicleColor(name)
     else return Color3.fromRGB(128, 128, 255) end
 end
 
-local function getDistance(vehicle)
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local playerPos = LocalPlayer.Character.HumanoidRootPart.Position
-        local vehiclePos = vehicle:GetPivot().Position
-        return math.floor((playerPos - vehiclePos).Magnitude)
-    end
-    return 0
+local function getDistance(pos1, pos2)
+    return math.floor((pos1 - pos2).Magnitude)
 end
 
-while task.wait() do
-    if not getgenv().Toggle then
-        break
-    end
-    if DB then 
-        return 
-    end
-    DB = true
-
-    pcall(function()
-        local spawnedVehicles = workspace:FindFirstChild("SpawnedVehicles")
-        if spawnedVehicles then
-            for _, vehicle in pairs(spawnedVehicles:GetChildren()) do
-                if vehicle and vehicle:FindFirstChild("VehicleESP") == nil and vehicle:FindFirstChild("VehicleInfo") == nil then
-                    
-                    local color = getVehicleColor(vehicle.Name)
-                    local distance = getDistance(vehicle)
-                    
-                    local ESP = Instance.new("Highlight")
-                    ESP.Name = "VehicleESP"
-                    ESP.Adornee = vehicle
-                    ESP.Archivable = true
-                    ESP.Enabled = true
-                    ESP.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                    ESP.FillColor = color
-                    ESP.FillTransparency = 0.5
-                    ESP.OutlineColor = Color3.fromRGB(255, 255, 255)
-                    ESP.OutlineTransparency = 0
-                    ESP.Parent = workspace.CurrentCamera
-                    
-                    local Icon = Instance.new("BillboardGui", vehicle)
-                    local ESPText = Instance.new("TextLabel")
-
-                    Icon.Name = "VehicleInfo"
-                    Icon.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-                    Icon.Active = true
-                    Icon.AlwaysOnTop = true
-                    Icon.ExtentsOffset = Vector3.new(0, 1, 0)
-                    Icon.LightInfluence = 1.000
-                    Icon.Size = UDim2.new(0, 250, 0, 50)
-
-                    ESPText.Name = "Vehicle Text"
-                    ESPText.Parent = Icon
-                    ESPText.BackgroundColor3 = color
-                    ESPText.BackgroundTransparency = 1.000
-                    ESPText.Size = UDim2.new(0, 250, 0, 50)
-                    ESPText.Font = Enum.Font.SciFi
-                    ESPText.Text = vehicle.Name .. " | Distance: " .. distance
-                    ESPText.TextColor3 = color
-                    ESPText.TextSize = 12.000
-                    ESPText.TextWrapped = true
-                    
-                    local espRef = Instance.new("ObjectValue")
-                    espRef.Name = "VehicleESP"
-                    espRef.Value = ESP
-                    espRef.Parent = vehicle
-                else
-                    local info = vehicle:FindFirstChild("VehicleInfo")
-                    if info and info:FindFirstChild("Vehicle Text") then
-                        local distance = getDistance(vehicle)
-                        info["Vehicle Text"].Text = vehicle.Name .. " | Distance: " .. distance
+spawn(function()
+    while task.wait() do
+        pcall(function()
+            if getgenv().PlayerESP then
+                for i,v in pairs(Players:GetChildren()) do
+                    if v:IsA("Player") and v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                        if not v.Character:FindFirstChild("PlayerInfo") then
+                            local Icon = Instance.new("BillboardGui", v.Character)
+                            Icon.Name = "PlayerInfo"
+                            Icon.AlwaysOnTop = true
+                            Icon.Size = UDim2.new(0, 200, 0, 30)
+                            Icon.StudsOffset = Vector3.new(0, 3, 0)
+                            
+                            local ESPText = Instance.new("TextLabel", Icon)
+                            ESPText.Size = UDim2.new(1, 0, 1, 0)
+                            ESPText.BackgroundTransparency = 1
+                            ESPText.Font = Enum.Font.SciFi
+                            ESPText.Text = v.Name
+                            ESPText.TextColor3 = v.TeamColor.Color
+                            ESPText.TextSize = 14
+                            ESPText.TextStrokeTransparency = 0
+                            ESPText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                        else
+                            local info = v.Character.PlayerInfo
+                            if info:FindFirstChild("TextLabel") then
+                                info.TextLabel.TextColor3 = v.TeamColor.Color
+                            end
+                        end
                     end
                 end
             end
-        end
-    end)
-    
-    wait()
-    DB = false
-end
+            
+            if getgenv().VehicleESP then
+                local spawnedVehicles = workspace:FindFirstChild("SpawnedVehicles")
+                if spawnedVehicles then
+                    for _, vehicle in pairs(spawnedVehicles:GetChildren()) do
+                        if vehicle and vehicle:IsA("Model") then
+                            local color = getVehicleColor(vehicle.Name)
+                            local distance = 0
+                            
+                            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                                distance = getDistance(LocalPlayer.Character.HumanoidRootPart.Position, vehicle:GetPivot().Position)
+                            end
+                            
+                            
+                            if not vehicle:FindFirstChild("VehicleHighlight") then
+                                pcall(function()
+                                    local ESP = Instance.new("Highlight", vehicle)
+                                    ESP.Name = "VehicleHighlight"
+                                    ESP.Adornee = vehicle
+                                    ESP.FillColor = color
+                                    ESP.FillTransparency = getgenv().VehicleTransparency
+                                    ESP.OutlineColor = Color3.fromRGB(255, 255, 255)
+                                    ESP.OutlineTransparency = 0
+                                end)
+                            else
+                                vehicle.VehicleHighlight.FillTransparency = getgenv().VehicleTransparency
+                            end
+                            
+                            if not vehicle:FindFirstChild("VehicleInfo") then
+                                local Icon = Instance.new("BillboardGui", vehicle)
+                                Icon.Name = "VehicleInfo"
+                                Icon.AlwaysOnTop = true
+                                Icon.Size = UDim2.new(0, 250, 0, 30)
+                                Icon.StudsOffset = Vector3.new(0, 5, 0)
+                                
+                                local ESPText = Instance.new("TextLabel", Icon)
+                                ESPText.Size = UDim2.new(1, 0, 1, 0)
+                                ESPText.BackgroundTransparency = 1
+                                ESPText.Font = Enum.Font.SciFi
+                                ESPText.Text = vehicle.Name .. " | " .. distance
+                                ESPText.TextColor3 = color
+                                ESPText.TextSize = 12
+                                ESPText.TextStrokeTransparency = 0
+                                ESPText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                            else
+                                local info = vehicle.VehicleInfo
+                                if info:FindFirstChild("TextLabel") then
+                                    info.TextLabel.Text = vehicle.Name .. " | " .. distance
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end)
