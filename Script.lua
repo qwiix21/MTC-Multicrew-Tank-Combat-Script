@@ -1,6 +1,6 @@
 game.StarterGui:SetCore("SendNotification", {
     Title = "M.T.C ESP Loaded",
-    Text = "WARNING: Feature in development!\nBugs and issues present.\nFreecam: Shift+P",
+    Text = "WARNING: Feature in development!\nBugs and issues present.",
     Button1 = "OK",
 })
 
@@ -9,11 +9,9 @@ local Window = Library.CreateLib("M.T.C ESP", "DarkTheme")
 
 local PlayerTab = Window:NewTab("Player ESP")
 local VehicleTab = Window:NewTab("Vehicle ESP")
-local CameraTab = Window:NewTab("Camera")
 
 local PlayerSection = PlayerTab:NewSection("Player Settings")
 local VehicleSection = VehicleTab:NewSection("Vehicle Settings")
-local CameraSection = CameraTab:NewSection("Camera Settings")
 
 getgenv().PlayerESP = false
 getgenv().VehicleESP = false
@@ -83,15 +81,7 @@ VehicleSection:NewToggle("Show Vehicle Labels", "Toggle vehicle name labels", fu
     end
 end)
 
-CameraSection:NewButton("Freecam Info", "Press Shift+P to toggle freecam", function()
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Freecam",
-        Text = "Press Shift+P to toggle freecam",
-        Button1 = "OK",
-    })
-end)
 
-local freecam = loadstring(game:HttpGet("https://pastebin.com/raw/4JrUuEqn"))()
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -197,3 +187,9 @@ spawn(function()
         end)
     end
 end)
+
+            end
+        end)
+    end
+end)
+
