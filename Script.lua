@@ -24,8 +24,13 @@ PlayerSection:NewToggle("Enable Player ESP", "Toggle player ESP", function(state
     getgenv().PlayerESP = state
     if not state then
         for i,v in pairs(game:GetService("Players"):GetChildren()) do
-            if v.Character and v.Character:FindFirstChild("PlayerInfo") then
-                v.Character.PlayerInfo:Destroy()
+            if v.Character then
+                if v.Character:FindFirstChild("PlayerInfo") then
+                    v.Character.PlayerInfo:Destroy()
+                end
+                if v.Character:FindFirstChild("PlayerHighlight") then
+                    v.Character.PlayerHighlight:Destroy()
+                end
             end
         end
     end
@@ -103,26 +108,45 @@ spawn(function()
             if getgenv().PlayerESP then
                 for i,v in pairs(Players:GetChildren()) do
                     if v:IsA("Player") and v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-                        if not v.Character:FindFirstChild("PlayerInfo") and getgenv().PlayerLabels then
-                            local Icon = Instance.new("BillboardGui", v.Character)
-                            Icon.Name = "PlayerInfo"
-                            Icon.AlwaysOnTop = true
-                            Icon.Size = UDim2.new(0, 200, 0, 30)
-                            Icon.StudsOffset = Vector3.new(0, 3, 0)
-                            
-                            local ESPText = Instance.new("TextLabel", Icon)
-                            ESPText.Size = UDim2.new(1, 0, 1, 0)
-                            ESPText.BackgroundTransparency = 1
-                            ESPText.Font = Enum.Font.SciFi
-                            ESPText.Text = v.Name
-                            ESPText.TextColor3 = v.TeamColor.Color
-                            ESPText.TextSize = 14
-                            ESPText.TextStrokeTransparency = 0
-                            ESPText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                        -- Создаем Highlight для игрока
+                        if not v.Character:FindFirstChild("PlayerHighlight") then
+                            pcall(function()
+                                local ESP = Instance.new("Highlight", v.Character)
+                                ESP.Name = "PlayerHighlight"
+                                ESP.Adornee = v.Character
+                                ESP.FillColor = v.TeamColor.Color
+                                ESP.FillTransparency = getgenv().PlayerTransparency
+                                ESP.OutlineColor = Color3.fromRGB(255, 255, 255)
+                                ESP.OutlineTransparency = 0
+                            end)
                         else
-                            local info = v.Character.PlayerInfo
-                            if info:FindFirstChild("TextLabel") then
-                                info.TextLabel.TextColor3 = v.TeamColor.Color
+                            v.Character.PlayerHighlight.FillTransparency = getgenv().PlayerTransparency
+                            v.Character.PlayerHighlight.FillColor = v.TeamColor.Color
+                        end
+                        
+                        -- Создаем текстовую метку если включены лейблы
+                        if getgenv().PlayerLabels then
+                            if not v.Character:FindFirstChild("PlayerInfo") then
+                                local Icon = Instance.new("BillboardGui", v.Character)
+                                Icon.Name = "PlayerInfo"
+                                Icon.AlwaysOnTop = true
+                                Icon.Size = UDim2.new(0, 200, 0, 30)
+                                Icon.StudsOffset = Vector3.new(0, 3, 0)
+                                
+                                local ESPText = Instance.new("TextLabel", Icon)
+                                ESPText.Size = UDim2.new(1, 0, 1, 0)
+                                ESPText.BackgroundTransparency = 1
+                                ESPText.Font = Enum.Font.SciFi
+                                ESPText.Text = v.Name
+                                ESPText.TextColor3 = v.TeamColor.Color
+                                ESPText.TextSize = 14
+                                ESPText.TextStrokeTransparency = 0
+                                ESPText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                            else
+                                local info = v.Character.PlayerInfo
+                                if info:FindFirstChild("TextLabel") then
+                                    info.TextLabel.TextColor3 = v.TeamColor.Color
+                                end
                             end
                         end
                     end
