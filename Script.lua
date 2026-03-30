@@ -108,7 +108,6 @@ spawn(function()
             if getgenv().PlayerESP then
                 for i,v in pairs(Players:GetChildren()) do
                     if v:IsA("Player") and v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-                        -- Создаем Highlight для игрока
                         if not v.Character:FindFirstChild("PlayerHighlight") then
                             pcall(function()
                                 local ESP = Instance.new("Highlight", v.Character)
@@ -124,7 +123,6 @@ spawn(function()
                             v.Character.PlayerHighlight.FillColor = v.TeamColor.Color
                         end
                         
-                        -- Создаем текстовую метку если включены лейблы
                         if getgenv().PlayerLabels then
                             if not v.Character:FindFirstChild("PlayerInfo") then
                                 local Icon = Instance.new("BillboardGui", v.Character)
