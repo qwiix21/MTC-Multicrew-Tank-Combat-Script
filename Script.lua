@@ -1,9 +1,3 @@
-game.StarterGui:SetCore("SendNotification", {
-    Title = "M.T.C ESP Loaded",
-    Text = "WARNING: Feature in development!\nBugs and issues present.",
-    Button1 = "OK",
-})
-
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
 local Window = Library.CreateLib("M.T.C ESP", "DarkTheme")
 
